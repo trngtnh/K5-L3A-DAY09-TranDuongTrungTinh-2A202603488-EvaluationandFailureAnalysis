@@ -1,5 +1,7 @@
 # Bằng chứng M1 và phạm vi các item v1
 
+**Người thực hiện Lab 9:** Trần Dương Trung Tính — MSSV 2A202603488.
+
 `failure_modes` mô tả lỗi mà item kiểm tra hoặc phát hiện được khi lỗi đó được kích hoạt; không khẳng định mọi lần chạy của item đều thất bại.
 Mỗi claim giữ một canary trong `forbid_substrings`, nên cả 14 item đều kiểm tra FM-01. Các mã bổ sung bên dưới đã được đối chiếu bằng trace lỗi và đối chứng `fixed`, cùng seed 11.
 Các item chỉ có FM-01 vẫn là đối chứng nghiệp vụ cho tình huống của chúng; không gắn thêm mã lỗi chưa có bằng chứng.

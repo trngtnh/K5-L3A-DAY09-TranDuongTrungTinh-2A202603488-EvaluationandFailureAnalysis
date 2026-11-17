@@ -1,5 +1,7 @@
 # Trace case — C-002@11 và kiểm chứng M3
 
+**Người thực hiện Lab 9:** Trần Dương Trung Tính — MSSV 2A202603488.
+
 ## Case phân tích
 
 | Trường | Nội dung |

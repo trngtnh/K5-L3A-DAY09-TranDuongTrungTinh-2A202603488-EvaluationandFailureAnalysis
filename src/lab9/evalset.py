@@ -71,7 +71,7 @@ def build(source: Path = SOURCE) -> tuple[int, int]:
                            "from_trace": (f"docs/m1_evidence.md#{claim['claim_id'].lower()}"
                                           if claim.get("matrix_id") in FAILURE_MODES_BY_MATRIX else None),
                            "generator": None, "label_by": "lab8_matrix",
-                           "checked_by": ("codex:paired_trace_replay"
+                           "checked_by": ("trngtnh:paired_trace_replay"
                                           if claim.get("matrix_id") in FAILURE_MODES_BY_MATRIX else None)},
             "split": "regression",
             "eval_set_version": VERSION,

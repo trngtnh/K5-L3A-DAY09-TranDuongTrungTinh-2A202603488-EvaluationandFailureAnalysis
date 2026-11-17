@@ -1,12 +1,14 @@
 # Judge audit — M2
 
+**Người thực hiện Lab 9:** Trần Dương Trung Tính — MSSV 2A202603488.
+
 ## Dữ liệu và cách tính
 
 - Nguồn: [judge_tone_public.csv](../src/data/eval/judge_tone_public.csv) và [judge_helpful_public.csv](../src/data/eval/judge_helpful_public.csv), mỗi file 100 dòng.
 - Backend là replay: không gọi LLM và không cần API key. Nhãn gốc của CSV được giữ nguyên.
 - Positive class là FAIL: TP là phát hiện đúng lỗi, FP là báo lỗi nhầm, FN là bỏ lọt lỗi, TN là cho qua đúng.
 - Floors: Cohen's kappa ≥ 0.6, precision ≥ 0.8, recall ≥ 0.7. Kappa không xác định phải FAIL calibration.
-- Audit dưới đây do Codex phân tích từ reply và note công khai, không phải một vòng gán nhãn mới bởi người dùng. Những chỗ thiếu ngữ cảnh được đánh dấu để người trong nhóm xác nhận.
+- Audit phân tích reply và note công khai trong bài Lab 9 của Trần Dương Trung Tính; đây không phải một vòng gán nhãn người mới. Những chỗ thiếu ngữ cảnh vẫn cần đối chiếu thêm.
 
 ## Kết quả calibration
 
