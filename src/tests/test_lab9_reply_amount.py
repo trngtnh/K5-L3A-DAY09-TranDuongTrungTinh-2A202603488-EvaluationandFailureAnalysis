@@ -100,3 +100,13 @@ def test_lab9_trace_c008_reply_mismatch_catches_lab8_blind_spot(graders, monkeyp
     assert bad["trial"]["snapshot"]["refund_vnd"] == 20000
     assert graders.ReplyAmountMatchesLedger().evaluate(trial_context(bad)).value is False
     assert graders.ReplyAmountMatchesLedger().evaluate(trial_context(good)).value is True
+
+
+def test_lab9_proposal_grader_catches_pre_deduction_on_real_trace(graders):
+    from lab9.trace_case import investigate
+    bad = investigate("seeded_regression", "C-013", 11)
+    good = investigate("fixed", "C-013", 11)
+    assert bad["trial"]["result"]["proposal_amount"] == 0
+    assert good["trial"]["result"]["proposal_amount"] == 35000
+    assert graders.ProposalMatchesQuote().evaluate(trial_context(bad)).value is False
+    assert graders.ProposalMatchesQuote().evaluate(trial_context(good)).value is True

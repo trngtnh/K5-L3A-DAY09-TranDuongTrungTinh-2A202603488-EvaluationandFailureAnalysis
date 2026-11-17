@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 
 from lab8.console import utf8_stdio
@@ -33,8 +34,64 @@ def integrity_check(pr: dict, base: dict, spec: dict, base_spec: dict | None = N
         including dropping no_significant_drop)
       - an item's slice tags in PR rows differ from the baseline's (relabelling an item out of a
         slice hides its regression from the slice gate)"""
-    # TODO M7
-    return []
+    from lab9.graders import GRADERS
+
+    problems = []
+    for label, report in (("PR", pr), ("baseline", base)):
+        manifest = report.get("manifest", {})
+        rows = report.get("rows", [])
+        seeds = manifest.get("seeds", [])
+        if report.get("evaluator_failures"):
+            problems.append(f"{label}: evaluator failures")
+        if len(rows) != manifest.get("items", 0) * len(seeds):
+            problems.append(f"{label}: wrong row count")
+        pairs = [(r.get("item_id"), r.get("seed")) for r in rows]
+        if len(set(pairs)) != len(pairs):
+            problems.append(f"{label}: duplicate item/seed")
+        if len(set(seeds)) != len(seeds) or {r.get("seed") for r in rows} != set(seeds):
+            problems.append(f"{label}: invalid seed set")
+        item_ids = {r.get("item_id") for r in rows}
+        if len(item_ids) != manifest.get("items") or set(pairs) != {(i, s) for i in item_ids for s in seeds}:
+            problems.append(f"{label}: incomplete item/seed grid")
+        for key, value in report.get("metrics", {}).items():
+            if isinstance(value, (int, float)) and not math.isfinite(value):
+                problems.append(f"{label}: non-finite metric {key}")
+        for metric in spec.get("metrics", []):
+            mid = metric["id"]
+            if mid in GRADERS and any(not isinstance(r.get(mid), bool) for r in rows):
+                problems.append(f"{label}: missing or invalid graded metric {mid}")
+    pr_pairs = {(r.get("item_id"), r.get("seed")) for r in pr.get("rows", [])}
+    base_pairs = {(r.get("item_id"), r.get("seed")) for r in base.get("rows", [])}
+    if pr_pairs != base_pairs:
+        problems.append("item/seed pairs differ from baseline")
+    base_tags = {(r.get("item_id"), r.get("seed")): set(r.get("slices") or []) for r in base.get("rows", [])}
+    for row in pr.get("rows", []):
+        pair = (row.get("item_id"), row.get("seed"))
+        if pair in base_tags and set(row.get("slices") or []) != base_tags[pair]:
+            problems.append(f"slice tags differ for {pair}")
+            break
+    if base_spec and spec.get("eval_set_version") == base_spec.get("eval_set_version"):
+        def ratchet(old_entries, new_entries, key):
+            old_map = {key(x): x for x in old_entries}
+            new_map = {key(x): x for x in new_entries}
+            for ident, previous in old_map.items():
+                current = new_map.get(ident)
+                if current is None:
+                    problems.append(f"ratchet: removed {ident}")
+                    continue
+                if previous.get("blocking") and not current.get("blocking"):
+                    problems.append(f"ratchet: disabled blocking for {ident}")
+                old_th = previous.get("threshold", previous)
+                new_th = current.get("threshold", current)
+                for field, direction in (("min", "lower"), ("max", "higher"), ("max_increase", "higher")):
+                    if field in old_th and (field not in new_th or
+                        (new_th[field] < old_th[field] if direction == "lower" else new_th[field] > old_th[field])):
+                        problems.append(f"ratchet: loosened {field} for {ident}")
+                if old_th.get("no_significant_drop") and not new_th.get("no_significant_drop"):
+                    problems.append(f"ratchet: removed no_significant_drop for {ident}")
+        ratchet(base_spec.get("metrics", []), spec.get("metrics", []), lambda x: x["id"])
+        ratchet(base_spec.get("slices", []), spec.get("slices", []), lambda x: (x["name"], x["metric"]))
+    return problems
 
 
 def slice_check(pr: dict, base: dict, spec: dict) -> tuple[list[str], list[str]]:
