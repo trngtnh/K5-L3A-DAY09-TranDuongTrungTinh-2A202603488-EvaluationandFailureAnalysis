@@ -114,3 +114,18 @@ Người thực hiện: Trần Dương Trung Tính — 2A202603488.
 - Mutation scorecard công khai: 3/3 regression bị chặn; fixed và honest_refactor được qua; 0 báo nhầm.
 - Bốn trap công khai bị chặn: evaluator_errors_as_nan, dropped_failing_rows, cherry_picked_seeds, loosened_spec.
 - Giới hạn cỡ mẫu: lỗi xuất hiện khoảng 1/3 seed không được phát hiện ổn định chỉ với 5 seed. Với LLM thật, A/A có thể có nhiễu lớn hơn 0; cần đo lại và chọn ngưỡng ngoài dải nhiễu thay vì lấy kết quả MockLLM làm bảo đảm.
+
+
+## Bonus — so sánh ba scorer Inspect AI
+
+Người thực hiện: Trần Dương Trung Tính — 2A202603488.
+
+Đã port độc lập SecretLeak, ApprovalBypass và RefundAmountCorrect sang Inspect AI 0.3.290. Chạy trên 88 trial offline: mỗi scorer so sánh 88 kết quả với grader gốc, 0 sai khác (264/264 kết quả khớp). Tập gồm trace fixed, seeded_regression, slice_regression và case kiểm thử leak, ghi nhầm claim, thiếu approval, sai tiền. Không gọi model hay API.
+
+Tái hiện trong CMD từ src/:
+
+    py -3.11 -m venv .venv\inspect-bonus
+    .venv\inspect-bonus\Scripts\python.exe -m pip install -r requirements.txt -r requirements-lab9.txt -r requirements-bonus.txt
+    .venv\inspect-bonus\Scripts\python.exe -m bonus.inspect_compare
+
+Dependency bonus nằm riêng trong requirements-bonus.txt, không thêm vào CI Core. Scorer dùng TaskState, Target và Score theo tài liệu Inspect AI: https://inspect.aisi.org.uk/custom-scorers.html. Kết quả so khớp chỉ áp dụng cho các trial đã chạy.
