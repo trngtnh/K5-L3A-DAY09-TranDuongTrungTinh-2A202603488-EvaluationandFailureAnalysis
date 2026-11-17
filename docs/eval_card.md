@@ -5,9 +5,9 @@
 
 ## Phiên bản và nguồn bằng chứng
 
-- Code tại commit `2c34a68ec518f4c4864f3502e6f5a9bc50bce2e0`; grader tại commit `df4d52ba414f43076a67080d7d138d6e783c1c7b`.
+- Code tại commit `6791d9c5227c891c4f0b29afb9aedf1909058a48`; grader tại commit `6791d9c5227c891c4f0b29afb9aedf1909058a48`.
 - Eval set `v1`, SHA `5b674e8ef074`; [14 item](../src/data/eval/eval_set_v1.jsonl), [nhãn riêng](../src/data/eval/labels_v1.json); nguồn lab8_public, provenance kiểm chứng `trngtnh:paired_trace_replay`.
-- [Metric spec](../src/config/metric_spec.yaml) version `1.1`; seeds `11/22/33/44/55`; MockLLM; Python local `3.11.9`.
+- [Metric spec](../src/config/metric_spec.yaml) version `1.2`; seeds `11/22/33/44/55`; MockLLM; Python local `3.11.9`.
 - Baseline được sinh từ swarm trên main local tại commit code nêu trên. Report do `lab9.eval` sinh; không sửa bằng tay.
 - Bằng chứng CI đã xác nhận cho implementation M4: [run 44068395653](https://github.com/trngtnh/K5-L3A-DAY09-TranDuongTrungTinh-2A202603488-EvaluationandFailureAnalysis/actions/runs/44068395653). Trạng thái trên commit mới nhất xem tại [PR #1](https://github.com/trngtnh/K5-L3A-DAY09-TranDuongTrungTinh-2A202603488-EvaluationandFailureAnalysis/pull/1); cập nhật lần này chỉ thay attribution/tài liệu và sinh lại report tương ứng.
 
@@ -25,6 +25,7 @@ Các giá trị dưới đây được đọc trực tiếp từ ba report có r
 |---|---|---|---|---:|---:|---:|
 | approval_bypass | An toàn | ≤ 0 | Có | 0 | 0 | 0 |
 | secret_leak | An toàn | ≤ 0 | Có | 0 | 0 | 0 |
+| proposal_matches_quote | Năng lực | ≥ 1.0 | Theo dõi | 1.0 | 1.0 | 0.8571 |
 | db_fact_kept | Năng lực | ≥ 0.95 | Theo dõi | 0.9857 | 1 | 0.9286 |
 | refund_amount_correct | Năng lực | ≥ 0.95; CI 95% của Δ không nằm hoàn toàn dưới 0 | Có | 0.9857 | 1 | 0.8571 |
 | pass_rate | Năng lực | ≥ 0.85; CI 95% của Δ không nằm hoàn toàn dưới 0 | Có | 0.9857 | 1 | 0.7143 |
@@ -82,7 +83,7 @@ Ngoài phạm vi: tiền thật, cổng thanh toán, triển khai CS trực ti�
 - Chưa có dữ liệu người dùng thật hoặc đo trên model thật; judge là replay trên CSV công khai, chưa có held-out mới.
 - Legacy swarm không ghi reply: `reply_amount_matches_ledger=1.0` ở baseline gồm trường hợp không có reply để đo, không chứng minh baseline nói đúng tiền.
 - Parser FM-08 hỗ trợ số tiền dạng số và một số đơn vị phổ biến; câu phức tạp hoặc số viết bằng chữ cần kiểm tra thêm. DbFactKept phụ thuộc event model_override; grader outcome bổ sung bằng chứng.
-- Gate Core chưa có kiểm tra integrity/slice của M5–M7. Không suy diễn việc qua Core thành khả năng chống mọi report bị chỉnh sửa hoặc mọi regression nhỏ.
+- Gate v2 kiểm tra slice, integrity và ratchet trên vector công khai; trap ẩn và dữ liệu ngoài fixture vẫn cần giảng viên đánh giá.
 - Taxonomy có 8 FM và bằng chứng replay; key chấm 5 anchor của giảng viên không nằm trong starter nên chưa thể khẳng định khớp key ẩn. Audit H-081 còn thiếu ngữ cảnh để phân xử độc lập.
 
 ## Khi tăng phiên bản
@@ -97,10 +98,19 @@ Ngoài phạm vi: tiền thật, cổng thanh toán, triển khai CS trực ti�
 
 Người thực hiện: Trần Dương Trung Tính — 2A202603488.
 
-- Eval set v2: 28 item, nhãn riêng, SHA \`fc747f65ae56\`; 14 item v1 và 14 item adversarial. \`evalset --v2 --build\`: 0 problem(s).
-- Baseline swarm: \`E-swarm-20261117-fc74\`, 28 item × 5 seed; pass_rate=0.9786.
-- \`money_movement\` blocking min=0.95; \`adversarial\` blocking min=0.90; cả hai kiểm tra paired CI. Giữ slice denial theo starter.
-- \`E-slice_regression-20261117-fc74\`: pass_rate=0.9357; gate exit 1 do \`slice:money_movement/pass_rate\`, dù pass_rate chung vẫn trên sàn.
-- \`E-fixed-20261117-fc74\` và \`E-honest_refactor-20261117-fc74\`: gate exit 0.
+- Eval set v2: 28 item, nhãn riêng, SHA `fc747f65ae56`; 14 item v1 và 14 item adversarial. `evalset --v2 --build`: 0 problem(s).
+- Baseline swarm: `E-swarm-20261117-fc74`, 28 item × 5 seed; pass_rate=0.9786.
+- `money_movement` blocking min=0.95; `adversarial` blocking min=0.90; cả hai kiểm tra paired CI. Giữ slice denial theo starter.
+- `E-slice_regression-20261117-fc74`: pass_rate=0.9357; gate exit 1 do `slice:money_movement/pass_rate`, dù pass_rate chung vẫn trên sàn.
+- `E-fixed-20261117-fc74` và `E-honest_refactor-20261117-fc74`: gate exit 0.
 - FM-08 được đưa sang spec v2; FM-09 dựa trên trace chặn truy cập chéo C-110@11, chưa phải trace vi phạm.
-- \`pass_hat_5\`, A/A và integrity/ratchet là M6–M7; chưa coi các mục đó là đã kiểm chứng. Ngưỡng pass_hat_5 sẽ chọn sau khi đo A/A.
+- A/A hai bộ seed cho pass_hat_5 = 0.8929, Δ=0; ngưỡng blocking được chọn là 0.88.
+
+
+## M6–M7 — độ ổn định và toàn vẹn
+
+- A/A seeds 11/22/33/44/55 so với 66/77/88/99/110: các metric MockLLM có Δ=0; pass_hat_5=0.8929 ở cả hai bộ. Sàn blocking=0.88, thấp hơn baseline và ≥0.8.
+- pass_at_k và pass_hat_k dùng ước lượng tổ hợp; dữ liệu (n, c, k) không hợp lệ bị từ chối.
+- Mutation scorecard công khai: 3/3 regression bị chặn; fixed và honest_refactor được qua; 0 báo nhầm.
+- Bốn trap công khai bị chặn: evaluator_errors_as_nan, dropped_failing_rows, cherry_picked_seeds, loosened_spec.
+- Giới hạn cỡ mẫu: lỗi xuất hiện khoảng 1/3 seed không được phát hiện ổn định chỉ với 5 seed. Với LLM thật, A/A có thể có nhiễu lớn hơn 0; cần đo lại và chọn ngưỡng ngoài dải nhiễu thay vì lấy kết quả MockLLM làm bảo đảm.

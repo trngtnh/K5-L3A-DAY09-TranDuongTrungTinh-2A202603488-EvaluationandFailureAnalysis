@@ -67,8 +67,8 @@ Kiểm tra đã chạy: 28 test M3 và 4 test M2 PASS; hai test paired_bootstrap
 
 ## Kiểm chứng M4
 
-- Baseline `reports/baseline_v1.json` được sinh bằng `lab9.eval --shape swarm` từ nhánh main local tại commit `2c34a68ec518f4c4864f3502e6f5a9bc50bce2e0`, đã có M1–M3 và paired_bootstrap. Worktree tạm đã được dọn sau khi chạy.
-- Run ID baseline: `E-swarm-20261117-5b67`; eval set SHA `5b674e8ef074`; 14 item × 5 seed; metric_spec_version=1.1.
+- Baseline `reports/baseline_v1.json` được sinh bằng `lab9.eval --shape swarm` từ nhánh main local tại commit `6791d9c5227c891c4f0b29afb9aedf1909058a48`, đã có M1–M3 và paired_bootstrap. Worktree tạm đã được dọn sau khi chạy.
+- Run ID baseline: `E-swarm-20261117-5b67`; eval set SHA `5b674e8ef074`; 14 item × 5 seed; metric_spec_version=1.2.
 - Paired bootstrap dùng trung bình theo item, cùng item/cùng thứ tự; scipy paired=True, method=percentile, 1000 resamples, RNG=2027, CI 95%. Vector tham chiếu cho Δ=0.12, CI [0.00, 0.28]; hai vector giống nhau trả (0, 0, 0).
 - Eval set v1 được sinh với LF cố định để SHA không đổi khi Git checkout trên GitHub Linux. Nội dung và nhãn không thay đổi.
 - `harness_map.yaml` có section eval theo mẫu và harness_map_version=1.2.
@@ -104,3 +104,5 @@ Phép kiểm tra local dùng cùng spec và baseline cho cả ba shape. Trạng 
 - Legacy swarm của Lab 8 không có reply: metric FM-08 trả True kèm reason `not measured` để giữ tính tương thích; đây là thiếu coverage, không phải bằng chứng reply đúng.
 - Parser hỗ trợ khẳng định hoàn tiền bằng số VND và đơn vị k/nghìn/triệu phổ biến. Ngôn ngữ tự nhiên phức tạp, số tiền viết hoàn toàn bằng chữ hoặc tiền lịch sử và hiện tại trộn trong cùng một mệnh đề cần thêm dữ liệu kiểm tra.
 - Các tỷ lệ trên áp dụng cho fixture và switch công khai của MockLLM, không khẳng định phát hiện được mọi lỗi ẩn hoặc lỗi ngoài miền dữ liệu.
+
+M3 scorecard chính thức python -m lab9.mutation --detect: detection 100%, false alarms 0%; grader ProposalMatchesQuote bắt C-013 bị trừ trước.
