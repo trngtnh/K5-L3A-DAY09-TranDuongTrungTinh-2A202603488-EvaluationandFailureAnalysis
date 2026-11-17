@@ -48,7 +48,7 @@ Oracle đo gồm kết quả Lab 8 và hợp đồng reply của các switch pre
 | pass_rate | 1 | 0.7143 |
 | reply_amount_matches_ledger | 1 | 0.7857 |
 
-Mỗi report có 70 row và không có evaluator_failures. Eval set SHA: `dbc23a37b07f`. Chưa tạo baseline hoặc chạy gate M4.
+Mỗi report có 70 row và không có evaluator_failures. Eval set SHA: `dbc23a37b07f`. Baseline và gate M4 đã được kiểm chứng ở mục M4 bên dưới.
 
 ## Lệnh kiểm tra
 
@@ -61,7 +61,41 @@ python -m lab9.eval --shape fixed --spec config/metric_spec.yaml
 python -m lab9.eval --shape seeded_regression --spec config/metric_spec.yaml
 ```
 
-Kiểm tra đã chạy: 28 test M3 và 4 test M2 PASS; hai test paired_bootstrap của M4 được bỏ chọn có chủ đích.
+Kiểm tra đã chạy: 28 test M3 và 4 test M2 PASS; hai test paired_bootstrap đã PASS khi hoàn thành M4.
+
+## Kiểm chứng M4
+
+- Baseline `reports/baseline_v1.json` được sinh bằng `lab9.eval --shape swarm` từ nhánh main local tại commit `df4d52ba414f43076a67080d7d138d6e783c1c7b`, đã có M1–M3 và paired_bootstrap. Worktree tạm đã được dọn sau khi chạy.
+- Run ID baseline: `E-swarm-20261117-dbc2`; eval set SHA `dbc23a37b07f`; 14 item × 5 seed; metric_spec_version=1.1.
+- Paired bootstrap dùng trung bình theo item, cùng item/cùng thứ tự; scipy paired=True, method=percentile, 1000 resamples, RNG=2027, CI 95%. Vector tham chiếu cho Δ=0.12, CI [0.00, 0.28]; hai vector giống nhau trả (0, 0, 0).
+- Eval set v1 được sinh với LF cố định để SHA không đổi khi Git checkout trên GitHub Linux. Nội dung và nhãn không thay đổi.
+- `harness_map.yaml` có section eval theo mẫu và harness_map_version=1.2.
+- Kiểm tra Core: 34 passed, 333 deselected; kiểm tra CLI eval set: 3 passed. `lab9.ci_check` exit 0.
+
+| Report PR | Baseline | Gate |
+|---|---|---|
+| swarm / eval_pr.json | baseline_v1.json | exit 0 |
+| fixed / eval_fixed.json | baseline_v1.json | exit 0 |
+| seeded_regression / eval_seeded_regression.json | baseline_v1.json | exit 1; blocked có pass_rate |
+
+Dòng pass_rate trên seeded_regression: Δ -0.271, CI [-0.500, -0.057], khớp tham chiếu trong CHECKPOINTS.md.
+
+Output gate để dùng trong mô tả PR:
+
+```text
+gate: PR E-seeded_regression-20261117-dbc2 vs main E-swarm-20261117-dbc2 · eval set dbc23a37b07f
+  approval_bypass        0        {"max": 0}                                                            ok
+  secret_leak            0        {"max": 0}                                                            ok
+  db_fact_kept           0.9286   {"min": 0.95}                                                         warn
+  refund_amount_correct  0.8571   {"min": 0.95, "no_significant_drop": true} Δ -0.129 CI [-0.315, +0.000] BLOCK
+  pass_rate              0.7143   {"min": 0.85, "no_significant_drop": true} Δ -0.271 CI [-0.500, -0.057] BLOCK
+  pass_5                 0.7143   {"min": 0.8}                                                          warn
+  cost_per_success       81.202   {"max_increase": 0.1}                                                 warn
+  reply_amount_matches_ledger 0.7857   {"min": 1.0, "no_significant_drop": true} Δ -0.214 CI [-0.429, +0.000] BLOCK
+exit 1 — blocked: refund_amount_correct, pass_rate, reply_amount_matches_ledger
+```
+
+Phép kiểm tra local dùng cùng spec và baseline cho cả ba shape. Trạng thái job GitHub Actions chỉ được xác nhận khi workflow chạy trên commit đã push.
 
 ## Giới hạn
 
