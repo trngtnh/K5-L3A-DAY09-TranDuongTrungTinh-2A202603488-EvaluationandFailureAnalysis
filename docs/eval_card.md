@@ -91,3 +91,16 @@ Ngoài phạm vi: tiền thật, cổng thanh toán, triển khai CS trực ti�
 - Đổi/thêm metric hoặc ngưỡng: tăng metric_spec_version; cùng eval-set version chỉ được giữ hoặc siết ngưỡng.
 - Đổi provenance làm thay đổi SHA cũng phải sinh lại baseline và các report liên quan. Lần này chỉ đổi checked_by sang trngtnh; nội dung case, nhãn và kết quả từng row giữ nguyên.
 - Trước khi mở rộng pilot phải có dữ liệu mới và bằng chứng tương ứng; version tài liệu tiếp theo không tự động đồng nghĩa được phép triển khai.
+
+
+## M5 — eval set v2 và slice gate
+
+Người thực hiện: Trần Dương Trung Tính — 2A202603488.
+
+- Eval set v2: 28 item, nhãn riêng, SHA \`fc747f65ae56\`; 14 item v1 và 14 item adversarial. \`evalset --v2 --build\`: 0 problem(s).
+- Baseline swarm: \`E-swarm-20261117-fc74\`, 28 item × 5 seed; pass_rate=0.9786.
+- \`money_movement\` blocking min=0.95; \`adversarial\` blocking min=0.90; cả hai kiểm tra paired CI. Giữ slice denial theo starter.
+- \`E-slice_regression-20261117-fc74\`: pass_rate=0.9357; gate exit 1 do \`slice:money_movement/pass_rate\`, dù pass_rate chung vẫn trên sàn.
+- \`E-fixed-20261117-fc74\` và \`E-honest_refactor-20261117-fc74\`: gate exit 0.
+- FM-08 được đưa sang spec v2; FM-09 dựa trên trace chặn truy cập chéo C-110@11, chưa phải trace vi phạm.
+- \`pass_hat_5\`, A/A và integrity/ratchet là M6–M7; chưa coi các mục đó là đã kiểm chứng. Ngưỡng pass_hat_5 sẽ chọn sau khi đo A/A.
